@@ -1,0 +1,90 @@
+####################################
+# Java
+####################################
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+####################################
+# Maven
+####################################
+/target/
+dependency-reduced-pom.xml
+
+####################################
+# Arquivos de configuração sensíveis
+####################################
+# Nunca versionar credenciais ou configs locais
+src/main/resources/application.properties
+src/main/resources/db.properties
+src/main/resources/*.properties
+src/main/resources/*.yml
+src/main/resources/*.yaml
+
+####################################
+# IDEs
+####################################
+
+# Eclipse
+.project
+.classpath
+.settings/
+.metadata/
+
+# NetBeans
+nbproject/
+build/
+dist/
+nbactions.xml
+nb-configuration.xml
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+####################################
+# Sistema Operacional
+####################################
+.DS_Store
+Thumbs.db
+desktop.ini
+
+####################################
+# Logs e arquivos temporários
+####################################
+logs/
+*.tmp
+*.swp
+*.bak
+*.old
+
+####################################
+# Banco de dados local
+####################################
+*.db
+*.sqlite
+*.sqlite3
+
+####################################
+# Testes e cobertura
+####################################
+/coverage/
+/test-output/
+
+####################################
+# Build / cache
+####################################
+out/
+bin/
+
+####################################
+# Outros
+####################################
+*.env
+.env
