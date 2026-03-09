@@ -35,8 +35,8 @@ public class SeleçãoHeróiFrame extends JFrame {
     
     public SeleçãoHeróiFrame() { 
         setTitle("Seleção de Herói - Adventure World");
-        
-        setSize(LARGURA_JANELA, ALTURA_JANELA);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);

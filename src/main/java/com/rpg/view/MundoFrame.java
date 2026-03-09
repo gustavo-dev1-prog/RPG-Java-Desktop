@@ -4,247 +4,226 @@ import java.awt.BorderLayout;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import com.rpg.Heroi;
+import com.rpg.Slime;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 
 public class MundoFrame extends JFrame {
 
     private final JFXPanel fxPanel = new JFXPanel();
-    private String heroiSelecionado;
     private Pane mundoPane;
     private Scene scene;
-    private static final double CHAO_Y = 480;
-    private long ultimoFrame = 0;
-    private boolean bloqueioInput = false;
+    private double CHAO_Y;
+    private static final double OFFSET_CHAO = 16;
+    private long ultimoFrame;
     private Heroi heroi;
-    private ImageView espada;
-    private boolean atacando;
-    private double tempoAtaque = 0;
+    private Slime slime;
+    private boolean ataqueAplicado = false;
 
     public MundoFrame(String heroiSelecionado) {
-        this.heroiSelecionado = heroiSelecionado;
-        setTitle("Adventure World - " + heroiSelecionado);
-        setSize(900, 700);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setUndecorated(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setLocationRelativeTo(null);
+
         add(fxPanel, BorderLayout.CENTER);
-        Platform.runLater(() -> fxPanel.setScene(criarCena()));
+        Platform.runLater(() -> fxPanel.setScene(criarCena(heroiSelecionado)));
+
         setVisible(true);
     }
 
-    private Scene criarCena() {
+    private Scene criarCena(String heroiSelecionado) {
         mundoPane = new Pane();
-        mundoPane.setPrefSize(900, 700);
-        mundoPane.setStyle("-fx-background-color: #87CEEB;");
-        mundoPane.setFocusTraversable(true);
+        scene = new Scene(mundoPane);
 
         criarFundo();
-        criarHeroi();
-        criarHUD();
-        criarBotoes();
-        scene = new Scene(mundoPane, 900, 700);  
-        mundoPane.setFocusTraversable(true);
-        Platform.runLater(() -> mundoPane.requestFocus());
-        configurarTeclado(scene);
-        iniciarGameLoop();
-        Platform.runLater(() -> mundoPane.requestFocus());
-        
-        mundoPane.setOnMousePressed(e -> {
-            System.out.println("Mouse clicado: " + e.getButton());
 
-            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
-                iniciarAtaque();
-            }
+        scene.heightProperty().addListener((o, a, n) -> definirChao());
+
+        Platform.runLater(() -> {
+            definirChao();
+            criarHeroi(heroiSelecionado); 
+            criarSlime();
+            criarBotoes();
+            configurarTeclado();
+            configurarMouse();
+            iniciarGameLoop();
+            mundoPane.requestFocus();
         });
-        
+
         return scene;
     }
 
-
-	private void iniciarAtaque() {
-		System.out.println("ATAQUE");
-		if(atacando) return;
-		atacando = true;
-		tempoAtaque = 0;
-	}
-
-	// 🌍 FUNDO DO MUNDO
     private void criarFundo() {
         Rectangle grama = new Rectangle();
         grama.setFill(Color.DARKGREEN);
-        grama.setY(CHAO_Y);
         grama.widthProperty().bind(mundoPane.widthProperty());
-        grama.heightProperty().bind(mundoPane.heightProperty().subtract(CHAO_Y));
+        grama.heightProperty().bind(mundoPane.heightProperty().multiply(0.25));
+        grama.yProperty().bind(mundoPane.heightProperty().multiply(0.75));
         mundoPane.getChildren().add(grama);
     }
 
-    // 🧙 CRIA HERÓI
-    private void criarHeroi() {
-        heroi = new Heroi(heroiSelecionado);
-        heroi.x = 400;
-        heroi.y = CHAO_Y - 150;
-        heroi.noChao = true;
-        heroi.sprite.setX(heroi.x);
-        heroi.sprite.setY(heroi.y);
-        File imgEspada = new File("sprites/espada.png");
-        espada = new ImageView(new Image(imgEspada.toURI().toString(), 80, 80, true, true));
-        espada.setX(400);
-        espada.setY(300);
-        mundoPane.getChildren().add(espada);
-        mundoPane.getChildren().add(heroi.sprite);
-       
-        
-    }
-  
-
-    // 🧠 HUD
-    private void criarHUD() {
-        Label hud = new Label( "Herói: " + heroiSelecionado + "\nVida: " + getVida() + "\nForça: " + getForca());
-        hud.setFont(Font.font("Arial", FontWeight.BOLD, 14));
-        hud.setTextFill(Color.WHITE);
-        hud.setStyle("-fx-background-color: rgba(0,0,0,0.6); -fx-padding: 10;");
-        hud.setLayoutX(20);
-        hud.setLayoutY(20);
-        mundoPane.getChildren().add(hud);
+    private void criarHeroi(String nome) {
+        heroi = new Heroi();
+        heroi.setPosicao(400,  CHAO_Y);
+        mundoPane.getChildren().add(heroi.grupo);
     }
 
-    // ⚙ BOTÃO MENU
-    private void criarBotoes() {
-        Button menu = new Button("⚙ Menu");
-        menu.setLayoutX(780);
-        menu.setLayoutY(20);
-        menu.setOnAction(e -> abrirMenu());
-        mundoPane.getChildren().add(menu);
+    private void criarSlime() {
+        slime = new Slime();
+        slime.getVidaBg().setWidth(60);
+        slime.getVida().setWidth(60);
+        slime.getVidaBg().setHeight(6);
+        slime.getVida().setHeight(6);
+
+        mundoPane.getChildren().addAll(
+            slime.getSprite(),
+            slime.getVidaBg(),
+            slime.getVida(),
+            slime.getHitbox()
+        );
     }
 
-    // 🎮 TECLADO
-    private void configurarTeclado(Scene scene) {
+    private void verificarAtaque() {
+        if (!heroi.estaAnimandoAtaque()) {
+            ataqueAplicado = false;
+            return;
+        }
+
+        if (ataqueAplicado) return;
+
+        var hitHeroi = heroi.hitboxAtaque.localToScene(
+                heroi.hitboxAtaque.getBoundsInLocal()
+        );
+
+        var hitSlime = slime.getHitbox().localToScene(
+                slime.getHitbox().getBoundsInLocal()
+        );
+
+        if (hitHeroi.intersects(hitSlime)) {
+            slime.tomarDano(10);
+            slime.aplicarKnockback(heroi.isViradoDireita());
+            ataqueAplicado = true;
+        }
+    }
+
+    private void definirChao() {
+        CHAO_Y = scene.getHeight() * 0.75 + OFFSET_CHAO;
+
+        if (heroi != null) {
+            heroi.setPosicao(100, CHAO_Y); 
+        }
+
+        if (slime != null) {
+            double slimeX = scene.getWidth() - 200; 
+            slime.setPosicao(slimeX, CHAO_Y);
+        }
+    }
+    
+    private void configurarTeclado() {
         scene.setOnKeyPressed(e -> {
-            if (bloqueioInput) return;
             switch (e.getCode()) {
-            case A, LEFT -> heroi.esquerda = true;
-            case D, RIGHT -> heroi.direita = true;
-            case SPACE -> {
-            if (heroi.noChao) {
-            heroi.vy = -450;
-            heroi.noChao = false;
+                case A -> heroi.esquerda = true;
+                case D -> heroi.direita = true;
+                case SPACE -> {
+                    if (heroi.noChao) {
+                        heroi.vy = -450;
+                        heroi.noChao = false;
                     }
                 }
-            case TAB -> abrirInventario();
-            case ESCAPE -> abrirMenu();
+                case ESCAPE -> abrirMenu();
             }
         });
 
         scene.setOnKeyReleased(e -> {
-        switch (e.getCode()) {
-        case A, LEFT -> heroi.esquerda = false;
-        case D, RIGHT -> heroi.direita = false;
+            if (e.getCode() == javafx.scene.input.KeyCode.A) heroi.esquerda = false;
+            if (e.getCode() == javafx.scene.input.KeyCode.D) heroi.direita = false;
+        });
+    }
+
+    private void configurarMouse() {
+        mundoPane.setOnMousePressed(e -> {
+            if (e.getButton() == javafx.scene.input.MouseButton.SECONDARY) {
+                heroi.atacar();
             }
         });
     }
 
-    // 🧍 MOVIMENTO
-    private void atualizarMovimento(double delta) {
-        if (!atacando) {
-            if (heroi.esquerda) heroi.x -= 200 * delta;
-            if (heroi.direita) heroi.x += 200 * delta;
-        }
-        heroi.vy += 900 * delta;
-        heroi.y += heroi.vy * delta;
-
-        if (heroi.y >= CHAO_Y - 150) {
-            heroi.y = CHAO_Y - 150;
-            heroi.vy = 0;
-            heroi.noChao = true;
-        }
-
-        heroi.sprite.setX(heroi.x);
-        heroi.sprite.setY(heroi.y);
-        if (espada != null) {
-            espada.setX(heroi.x + 60);
-            espada.setY(heroi.y + 40);
-        }
-    }
-
-    
-    private void atualizarAtaque(double delta) {
-        if (!atacando || espada == null) return;
-        tempoAtaque += delta;
-        double duracao = 0.25;
-        double t = tempoAtaque / duracao;
-        if (t >= 1) {
-            atacando = false;
-            tempoAtaque = 0;
-            espada.setRotate(0);
-            return;
-        }
-        double angulo = -100 + (200 * t);
-        espada.setRotate(angulo);
-    }
-    
-
-    // 🔁 GAME LOOP
     private void iniciarGameLoop() {
         new AnimationTimer() {
-        @Override
-        
-     public void handle(long agora) {
-       if (ultimoFrame == 0) {
-       ultimoFrame = agora;
-       return;
+            @Override
+            public void handle(long agora) {
+                if (ultimoFrame == 0) {
+                    ultimoFrame = agora;
+                    return;
                 }
-       double delta = (agora - ultimoFrame) / 1_000_000_000.0;
-       ultimoFrame = agora;
-       atualizarMovimento(delta);
-       atualizarAtaque(delta);
+
+                double delta = (agora - ultimoFrame) / 1e9;
+                ultimoFrame = agora;
+                heroi.atualizar(delta, CHAO_Y);
+                if (!slime.estaMorto()) {
+                    slime.atualizar(delta);
+                    atualizarBarraSlime();
+                    verificarAtaque();
+                }
             }
         }.start();
     }
 
-    // 🎒 INVENTÁRIO
-    private void abrirInventario() {
-        JOptionPane.showMessageDialog(this, "Inventário\n• Poção\n• Espada\n• Ouro", "Inventário",JOptionPane.INFORMATION_MESSAGE);
-        Platform.runLater(() -> mundoPane.requestFocus());
+    private void atualizarBarraSlime() {
+    	double barraX = slime.getSprite().getX() + (slime.getSprite().getFitWidth() - slime.getVidaBg().getWidth()) / 2;
+    	double barraY = slime.getSprite().getY() - 18;
+    	slime.getVidaBg().setX(barraX);
+    	slime.getVidaBg().setY(barraY);
+    	slime.getVida().setX(barraX);
+    	slime.getVida().setY(barraY);
     }
 
-    // ⚙ MENU
+    private void criarBotoes() {
+        Button menu = new Button("Menu");
+        menu.setLayoutX(20);
+        menu.setLayoutY(20);
+        menu.setFocusTraversable(false);
+        menu.setOnAction(e -> abrirMenu());
+        mundoPane.getChildren().add(menu);
+    }
+
     private void abrirMenu() {
-        int op = JOptionPane.showConfirmDialog(this, "Deseja voltar ao menu?", "Menu", JOptionPane.YES_NO_OPTION);
-        if (op == JOptionPane.YES_OPTION) {
-        dispose();
-        SwingUtilities.invokeLater(SeleçãoHeróiFrame::new);
-        } else {
-        Platform.runLater(() -> mundoPane.requestFocus());
-        }
-    }
+       String[] opcoes = {
+    		   "Continuar",
+    		   "Selecionar Herói",
+    		   "Sair do Jogo",
+             };
+       int escolha = JOptionPane.showOptionDialog( this, "Meu do Jogo", "Menu", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opcoes, opcoes[0]);
+       
 
-    // 📊 STATS
-    private int getVida() {
-        return switch (heroiSelecionado.toLowerCase()) {
-            case "guerreiro" -> 150;
-            default -> 100;
-        };
-    }
+       switch (escolha) {
 
-    private int getForca() {
-        return switch (heroiSelecionado.toLowerCase()) {
-            case "guerreiro" -> 25;
-            default -> 15;
-        };
+           case 0 -> {
+           }
+           case 1 -> {
+               voltarSelecaoHeroi();
+           }
+           case 2 -> {
+               System.exit(0);
+           }
+       }
+   }
+
+    private void voltarSelecaoHeroi() {
+    	dispose();
+    	new SeleçãoHeróiFrame();
     }
 }
+
+        
+        

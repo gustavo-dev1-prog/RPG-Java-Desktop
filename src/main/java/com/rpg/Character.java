@@ -3,37 +3,32 @@ package com.rpg;
 public abstract class Character {
 
     protected String nome;
-    protected int vida;
+    protected int vidaAtual;
+    protected int vidaMaxima;
     protected int forca;
 
     public boolean estaVivo() {
-        return vida > 0;
+        return vidaAtual > 0;
     }
 
     public void receberDano(int dano) {
-        if (dano < 0) return;
-
-        vida -= dano;
-        if (vida < 0) {
-            vida = 0;
-        }
+        vidaAtual -= dano;
+        if (vidaAtual < 0) vidaAtual = 0;
     }
 
-    public void atacar(Character alvo) {
-        if (alvo != null && estaVivo()) {
-            alvo.receberDano(forca);
-        }
+    public int getVidaAtual() {
+        return vidaAtual;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public int getVida() {
-        return vida;
+    public int getVidaMaxima() {
+        return vidaMaxima;
     }
 
     public int getForca() {
         return forca;
+    }
+
+    public String getNome() {
+        return nome;
     }
 }
