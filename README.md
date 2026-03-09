@@ -21,7 +21,6 @@ Desenvolver um jogo RPG desktop em Java, permitindo ao jogador controlar um her�
 - Movimentação do herói pelo teclado
 - Sistema de pulo e gravidade
 - Colisão com o chão
-- Inventário com itens (poção, espada e ouro)
 - Menu principal
 - Interface gráfica desktop
 - Sistema de controle por teclado
