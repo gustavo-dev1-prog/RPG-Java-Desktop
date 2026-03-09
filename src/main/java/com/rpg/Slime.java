@@ -55,6 +55,18 @@ public class Slime extends Enemy {
             knockback = 0;
             sprite.setX(baseX + Math.sin(tempo * 2) * 20);
         }
+        
+        double larguraTela = sprite.getScene().getWidth();
+        double larguraSlime = sprite.getFitWidth();
+
+        if (sprite.getX() < 0) {
+            sprite.setX(0);
+        }
+
+        if (sprite.getX() + larguraSlime > larguraTela) {
+            sprite.setX(larguraTela - larguraSlime);
+        }
+        
         if (piscando) {
             tempoDano += delta;
             sprite.setOpacity(Math.sin(tempoDano * 40) > 0 ? 0.3 : 1);

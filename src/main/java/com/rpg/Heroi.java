@@ -83,7 +83,18 @@ public class Heroi {
             x += VELOCIDADE * delta;
             viradoDireita = true;
         }
+        
+        double larguraTela = grupo.getScene().getWidth();
+        double larguraHeroi = sprite.getFitWidth();
 
+        if (x < 0) {
+            x = 0;
+        }
+
+        if (x + larguraHeroi > larguraTela) {
+            x = larguraTela - larguraHeroi;
+        }
+    
         if (!noChao) vy += GRAVIDADE * delta;
         y += vy * delta;
 

@@ -64,12 +64,18 @@ public class MundoFrame extends JFrame {
     }
 
     private void criarFundo() {
+    	
+    	 Rectangle ceu = new Rectangle();
+    	 ceu.setFill(Color.SKYBLUE);
+    	 ceu.widthProperty().bind(mundoPane.widthProperty());
+    	 ceu.heightProperty().bind(mundoPane.heightProperty().multiply(0.75));
+    	
         Rectangle grama = new Rectangle();
         grama.setFill(Color.DARKGREEN);
         grama.widthProperty().bind(mundoPane.widthProperty());
         grama.heightProperty().bind(mundoPane.heightProperty().multiply(0.25));
         grama.yProperty().bind(mundoPane.heightProperty().multiply(0.75));
-        mundoPane.getChildren().add(grama);
+        mundoPane.getChildren().addAll(ceu, grama);
     }
 
     private void criarHeroi(String nome) {
