@@ -1,26 +1,10 @@
-# 🎮 RPG Game Java
+RPG Game Java - Desktop 2D com JavaFX + Swing + MySQL
+Jogo desktop estilo medieval desenvolvido em Java para aplicar Orientação a Objetos, integração com banco de dados e arquitetura em camadas.
 
-## 📌 Status do Projeto
-🚧 Em desenvolvimento
+markdown   ![Demo do RPG](rpg_demo.gif)
 
-## 🛠️ Tecnologias Utilizadas
-- Java
-- JavaFX
-- Swing
-- Git
-- GitHub
-- SQL
+Status: Em desenvolvimento.
 
-## 👥 Time de Desenvolvedores
-- Gustavo Kato
+🎮 Demo
 
-## 🎯 Objetivo do Software
-Desenvolver um jogo RPG desktop em Java, permitindo ao jogador controlar um herói, explorar o mapa, interagir com o ambiente e gerenciar um inventário.
 
-## ⚙️ Funcionalidades do Sistema
-- Movimentação do herói pelo teclado
-- Sistema de pulo e gravidade
-- Colisão com o chão
-- Menu principal
-- Interface gráfica desktop
-- Sistema de controle por teclado
